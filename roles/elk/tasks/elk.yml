@@ -1,0 +1,154 @@
+---
+# Download and Install ELK
+- name: (ELK) Check if Elasticsearch is installed
+  stat:
+     path: /etc/elasticsearch/
+  register: elkstat
+
+- name: (ELK) Add elk apt key
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    id: 46095ACC8548582C1A2699A9D27D666CD88E42B4
+    state: present
+  when: elkstat.stat.exists == false
+
+- name: (ELK) Add elk repository
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+    state: present
+    update_cache: yes
+  when: elkstat.stat.exists == false
+
+- name: (Elasticsearch) Install elasticsearch
+  apt:
+    name: elasticsearch
+    state: present
+  tags:
+    - elk
+  when: elkstat.stat.exists == false
+
+- name: (Elasticsearch) Bind elasticsearch to localhost
+  blockinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    block: |
+      # Bind elasticsearch to localhost to prevent public access
+      network.host: "localhost"
+    state: present
+  when: elkstat.stat.exists == false
+
+- name: (Elasticsearch) Restart Elasticsearch
+  systemd:
+    state: started
+    name: elasticsearch
+    enabled: yes
+
+- name: (ELK) Check if Elasticsearch is installed
+  stat:
+     path: /etc/kibana/
+  register: kibanastat 
+
+- name: (Kibana) Install kibana
+  apt:
+    name: kibana
+    state: present
+  tags:
+    - elk
+  when: kibanastat.stat.exists == false
+
+- name: (Kibana) Restart Kibana
+  systemd:
+    state: started
+    name: kibana
+    enabled: yes
+
+- name: (Kibana) Create a kibana user/password
+  htpasswd:
+    path: /etc/nginx/htpasswd.users
+    name: kanyi
+    password: "kibanapass"
+    state: present
+    group: www-data
+    mode: 0640
+  when: kibanastat.stat.exists == false
+
+- name: (Kibana) Configure Kibana Dashboard to proxy Requests
+  copy:
+    src: roles/elk/templates/kibana.yml
+    dest: /etc/nginx/sites-available/kibana
+  when: kibanastat.stat.exists == false
+
+- name: (Kibana) Create a Symbolic link of the kibana file
+  file:
+    src: /etc/nginx/sites-available/kibana
+    dest: /etc/nginx/sites-enabled/kibana
+    state: link
+  when: kibanastat.stat.exists == false
+
+- name: (Kibana) Restart Nginx
+  systemd:
+    state: restarted
+    name: nginx
+
+- name: (Kibana) Allow Full Access to Nginx Server
+  ufw:
+    rule: allow
+    name: Nginx Full
+
+- name: (ELK) Check if Elasticsearch is installed
+  stat:
+     path: /etc/logstash/
+  register: logstashstat
+
+- name: (Logstash) Install logstash
+  apt:
+    name: logstash
+    state: present
+  tags:
+    - elk
+  when: logstashstat.stat.exists == false
+
+- name: (Logstash) Configure Logstash input to listen on port 5044
+  copy:
+    src: roles/elk/templates/02-beats-input.conf
+    dest: /etc/logstash/conf.d/02-beats-input.conf
+
+
+- name: (Logstash) Configure Logstash Filter for nginx logs
+  copy:
+    src: roles/elk/templates/10-nginx-filter.conf
+    dest: /etc/logstash/conf.d/10-nginx-filter.conf
+
+- name: (Logstash) Configure Logstash output to send logs to elasticsearch
+  copy:
+    src: roles/elk/templates/30-beats-output.conf
+    dest: /etc/logstash/conf.d/30-beats-output.conf
+
+- name: (Kibana) Restart Kibana
+  systemd:
+    state: started
+    name: logstash
+    enabled: yes
+
+- name: (ELK) Load the filebeat templates for OSSEC servers
+  uri:
+    url: http://localhost:9200/_template/filebeat-7.3.0
+    method: PUT
+    body: "{{ hostvars[item]['ossecfilebeattemplate'].stdout }}"
+    body_format: json
+    headers: 
+      Content-Type: "application/json"
+  loop:
+    - "{{ groups['ossecservers'] | map('extract', hostvars, ['inventory_hostname']) | join(',') }}"
+  when: elkstat.stat.exists == false
+
+- name: (ELK) Load the filebeat templates for App servers
+  uri:
+    url: http://localhost:9200/_template/filebeat-7.3.0
+    method: PUT
+    body: "{{ hostvars[item]['appfilebeattemplate'].stdout }}"
+    body_format: json
+    headers: 
+      Content-Type: "application/json"
+  loop:
+    - "{{ groups['appservers'] | map('extract', hostvars, ['inventory_hostname']) | join(',') }}"
+  when: elkstat.stat.exists == false

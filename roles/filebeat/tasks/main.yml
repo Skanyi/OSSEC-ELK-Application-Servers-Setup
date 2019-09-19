@@ -1,0 +1,14 @@
+---
+# tasks file for filebeat
+- name: (Filebeat) Update repositories cache and install required packages
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - apt-transport-https
+  tags:
+    - packages
+
+- import_tasks: filebeat.yml

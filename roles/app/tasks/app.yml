@@ -1,0 +1,43 @@
+- name: (APP) Check if requirements.txt file exists
+  stat:
+    path: "{{ application_req_file }}"
+  register: reqfile
+
+- name: (APP) Install python Libraries  required by the app
+  pip:
+    chdir: "{{ application_dir }}"
+    requirements: "{{ application_req_file }}"
+    virtualenv: hello_venv
+  when: reqfile.stat.exists == True
+
+- name: (APP) Configure Gunicorn - Create a systemd unit file
+  copy:
+    src: roles/app/templates/helloworld.service.yml
+    dest: /etc/systemd/system/helloworld.service
+
+- name: (APP) Make sure the helloworld app is running
+  systemd:
+    state: restarted
+    name: helloworld
+    enabled: yes
+ 
+- name: (APP) Configure Nginx to proxy Requests
+  copy:
+    src: roles/app/templates/nginx.yml
+    dest: /etc/nginx/sites-available/helloworld
+
+- name: (APP) Create a Symbolic link of the nginx file
+  file:
+    src: /etc/nginx/sites-available/helloworld
+    dest: /etc/nginx/sites-enabled/helloworld
+    state: link
+
+- name: (APP) Restart Nginx
+  systemd:
+    state: restarted
+    name: nginx
+
+- name: (APP) Allow Full Access to Nginx Server
+  ufw:
+    rule: allow
+    name: Nginx Full

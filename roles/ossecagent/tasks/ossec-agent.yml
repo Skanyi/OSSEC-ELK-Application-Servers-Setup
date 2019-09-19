@@ -1,0 +1,48 @@
+---
+# Download and Install Ossec
+- name: (OSSEC Agent) Check if OSSEC Agent is already installed
+  stat:
+    path: "{{ ossec_dir }}"
+  register: ossecagent
+
+- name: (OSSEC Agent) Get the atomic installer script
+  get_url:
+    url: https://updates.atomicorp.com/installers/atomic
+    dest: /opt/atomic.sh
+    mode: +x
+  when: not ossecagent.stat.exists
+
+- name: (OSSEC Agent) Add Apt source to source.list
+  expect:
+    command: /opt/atomic.sh
+    responses:
+      Do you agree to these terms: "yes"
+      Press ENTER: ""
+  become: yes
+  when: not ossecagent.stat.exists
+
+- name: (OSSEC Agent) Check to see if atomic script installer was downloaded
+  stat:
+    path: /opt/atomic.sh
+  register: ossecatomic
+
+- name: (OSSEC Agent) Remove the atomic installer script
+  file:
+    state: absent
+    path: /opt/atomic.sh
+  when: not ossecatomic.stat.exists
+
+- name: (OSSEC Agent) APT Automated Installation Using RPM provided by AtomiCorp
+  apt:
+    update_cache: yes
+    name: ossec-hids-agent
+  become: yes
+  when: not ossecagent.stat.exists
+  register: ossecagentinstall
+
+- name: (OSSEC AGENT) Copy the ossec config file to app/elk servers
+  template:
+    src: roles/ossecagent/templates/ossec.j2
+    dest: /var/ossec/etc/ossec.conf
+  loop:
+    - "{{ groups['ossecservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"

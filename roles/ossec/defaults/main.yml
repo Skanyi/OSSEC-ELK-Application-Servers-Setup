@@ -1,0 +1,20 @@
+---
+# defaults file for ossec
+ossec_sha256sum: 34fac7664548ddfeea96cb0567df4eda7515cc107625eb25315a5c3522954197
+
+# OSSEC installation questions (with email notifications)
+ossec_dir: /var/ossec
+ossec_install_type: server
+ossec_email: y
+ossec_email_address: stephenkanyi7@gmail.com
+ossec_detected_smtp_use: n
+ossec_smtp_server: 127.0.0.1
+ossec_integritycheck_daemon: y
+ossec_rootkit_engine: y
+ossec_active_response: y
+ossec_firewalldrop_response: y
+ansible_controller_ip: 192.168.1.1
+
+
+# OSSEC Agents
+ossec_agent_keys: /var/ossec/etc/client.keys

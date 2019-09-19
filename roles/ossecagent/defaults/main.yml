@@ -1,0 +1,7 @@
+---
+# defaults file for ossecagent
+#
+ossec_dir: /var/ossec
+
+# Ossec Agent
+ossec_agent_keys: /var/ossec/etc/client.keys

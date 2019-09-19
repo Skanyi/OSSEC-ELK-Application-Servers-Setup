@@ -1,0 +1,64 @@
+---
+# Download and Install Filebeat
+- name: (Filebeat) Add Filebeat apt key
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    id: 46095ACC8548582C1A2699A9D27D666CD88E42B4
+    state: present
+
+- name: (Filebeat) Add filebeat repository
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+    state: present
+    update_cache: yes
+- name: (Filebeat) Install filebeat
+  apt:
+    name: filebeat
+    state: present
+  tags: 
+    - filebeat
+
+- name: (Filebeat) Copy the filebeat config file ossec servers
+  template:
+    src: roles/filebeat/templates/ossec-filebeat.j2
+    dest: /etc/filebeat/filebeat.yml
+  when: inventory_hostname in groups['ossecservers']
+  loop:
+    - "{{ groups['elkservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+- name: (Filebeat) Copy the filebeat config file to app servers
+  template:
+    src: roles/filebeat/templates/app-filebeat.j2
+    dest: /etc/filebeat/filebeat.yml
+  when: inventory_hostname in groups['appservers']
+  loop:
+    - "{{ groups['elkservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+
+- name: (Filebeat) Restart filebeat
+  systemd:
+    state: started
+    name: filebeat
+    enabled: yes
+
+- name: (Filebeat) Export the index template to a file for ossec servers
+  command: filebeat export template > ossec-filebeat.template.json
+  when: inventory_hostname in groups['ossecservers']
+  register: ossecfilebeattemplate
+
+- name: (Filebeat) Export the index template to a file for app servers
+  command: filebeat export template > app-filebeat.template.json
+  when: inventory_hostname in groups['appservers']
+  register: appfilebeattemplate
+
+# - name: (Filebeat) Load the Index template manually for ossec servers
+#   command: filebeat setup --index-management -E output.logstash.enabled=false -E 'output.elasticsearch.hosts=["{{ item }}:9200"]'
+#   when: inventory_hostname in groups['ossecservers']
+#   loop:
+#     - "{{ groups['elkservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+# - name: (Filebeat) Load the Index template manually for app servers
+#   command: filebeat setup --index-management -E output.logstash.enabled=false -E 'output.elasticsearch.hosts=["{{ item }}:9200"]'
+#   when: inventory_hostname in groups['appservers']
+#   loop:
+#     - "{{ groups['elkservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"

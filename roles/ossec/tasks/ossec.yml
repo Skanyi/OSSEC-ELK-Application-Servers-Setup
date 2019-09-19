@@ -1,0 +1,48 @@
+---
+# Download and Install Ossec
+- name: (OSSEC) Check if OSSEC is already installed
+  stat:
+    path: "{{ ossec_dir }}"
+  register: ossec
+
+- name: (OSSEC) Get the atomic installer script
+  get_url:
+    url: https://updates.atomicorp.com/installers/atomic
+    dest: /opt/atomic.sh
+    mode: +x
+  when: not ossec.stat.exists
+
+- name: (OSSEC) Add Apt source to source.list
+  expect:
+    command: /opt/atomic.sh
+    responses:
+      Do you agree to these terms: "yes"
+      Press ENTER: ""
+  become: yes
+  when: not ossec.stat.exists
+
+- name: (OSSEC) Check to see if atomic script installer was downloaded
+  stat:
+    path: /opt/atomic.sh
+  register: ossecatomic
+
+- name: (OSSEC) Remove the atomic installer script
+  file:
+    state: absent
+    path: /opt/atomic.sh
+  when: not ossecatomic.stat.exists
+
+- name: (OSSEC) APT Automated Installation Using RPM provided by AtomiCorp
+  apt:
+    update_cache: yes
+    name: ossec-hids-server
+  become: yes
+  notify: restart ossec
+  when: not ossec.stat.exists
+  register: ossecinstall 
+
+- name: (OSSEC) Copy the ossec config file to ossec servers
+  template:
+    src: roles/ossec/templates/ossec.j2
+    dest: /var/ossec/etc/ossec.conf
+  

@@ -1,0 +1,41 @@
+---
+# Adds agents and extract the agent keys
+- name: (OSSEC Agent) Check if the key file exists
+  stat:
+    path: "{{ ossec_agent_keys }}"
+  register: keyfileexists
+
+- name: (OSSEC Agent) Check if elkagent is already added
+  shell: "cat {{ ossec_agent_keys }}"
+  register: elkagentname
+  when:  keyfileexists.stat.exists == True
+
+- name: (OSSEC Agent) Add ELK Servers Agents
+  shell: /var/ossec/bin/manage_agents -a "{{ item }}" -n elkagent 
+  when: (keyfileexists.stat.exists == False) and ('"elkagent" not in elkagentname.stdout')
+  loop:
+    - "{{ groups['elkservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+- name: (OSSEC Agent) Extract Key for the elkagent
+  shell: "cat {{ ossec_agent_keys }} | grep -e elkagent | awk -F ' ' '{print $0}' | base64"
+  register: elkagentkey
+ 
+- name: (OSSEC Agent) Check if appagent is already added
+  shell: "cat {{ ossec_agent_keys }}"
+  register: appagentname
+  when:  keyfileexists.stat.exists == True
+
+- name: (OSSEC Agent) Add App Servers Agents
+  shell: /var/ossec/bin/manage_agents -a "{{ item }}" -n appagent
+  when: (keyfileexists.stat.exists == False) and ('"appagent" not in appagentname.stdout')
+  loop:
+    - "{{ groups['appservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+- name: (OSSEC Agent) Extract Key for the appagent
+  shell: "cat {{ ossec_agent_keys }} | grep -e appagent | awk -F ' ' '{print $0}' | base64"
+  register: appagentkey
+
+
+- name: (OSSEC Agent) Print key
+  debug:
+    msg: "{{ appagentkey.stdout }}"

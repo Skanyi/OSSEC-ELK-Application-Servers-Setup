@@ -1,0 +1,6 @@
+---
+- name: ansible site playbook
+  hosts: "{{ target | default('ossecservers') }}"
+  gather_facts: "{{ gather_facts | default('true') }}"
+  roles:
+    - ossec

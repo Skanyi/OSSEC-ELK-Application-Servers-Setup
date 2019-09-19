@@ -1,0 +1,20 @@
+---
+# Import the agent key Copied from the manager
+- name: (OSSEC Agent) Check if the key file exists
+  stat:
+    path: "{{ ossec_agent_keys }}"
+  register: keyfileexists
+
+- name: (OSSEC Agent) Check if elkagent exist
+  shell: "cat {{ ossec_agent_keys }}"
+  register: elkagentname
+  when: (hostvars['ossec']['elkagentkey'] is defined) and (keyfileexists.stat.exists == True)
+
+- name: (OSSEC Agent) Import ELK Agent
+  expect:
+    command: /var/ossec/bin/manage_agents -i "{{ hostvars['ossec']['elkagentkey'].stdout }}"
+    responses:
+      Confirm adding it: 'y'
+      Press ENTER to return to the main menu: ''
+  register: ossecelkagent
+  when: (keyfileexists.stat.exists == False) and ('"elkagent" not in elkagentname.stdout')

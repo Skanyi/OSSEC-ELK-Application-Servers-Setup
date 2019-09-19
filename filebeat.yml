@@ -1,0 +1,7 @@
+---
+# Run on both Ossec and app server
+- name: ansible site playbook
+  hosts: "{{ target | default('ossecservers:appservers') }}"
+  gather_facts: "{{ gather_facts | default('true') }}"
+  roles:
+    - filebeat

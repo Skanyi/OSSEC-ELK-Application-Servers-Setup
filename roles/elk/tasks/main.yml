@@ -1,0 +1,60 @@
+---
+# tasks file for elk
+- name: (ELK) Update repositories cache and install required packages
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    force_apt_get: true
+  vars:
+    packages:
+    - aptitude
+    - apt-transport-https
+    - default-jre
+    - nginx
+    - python3-passlib
+    - python3-setuptools
+    - python3-pexpect
+
+  tags:
+    - packages
+
+- name: (ELK) Enable UFW to manage firewall traffic and enable Openssh
+  ufw:
+    state: enabled
+    rule: allow
+    name: OpenSSH
+
+- name: (APP) Allow all outbound traffic through firewall
+  ufw:
+     rule: allow
+     direction: out
+     to_ip: any
+
+- name: (ELK) Allow traffic from OSSEC Servers for Filebeat 5044
+  ufw:
+    rule: allow
+    from_ip: "{{ item }}" 
+    to_port: '5044' 
+  loop:
+    - "{{ groups['ossecservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+- name: (ELK) Allow traffic from App Servers for Filebeat 5044
+  ufw:
+    rule: allow
+    from_ip: "{{ item }}"
+    to_port: '5044'  
+  loop:
+    - "{{ groups['appservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+
+- name: (ELK) Allow traffic from OSSEC Servers for ossec server manager
+  ufw:
+    rule: allow
+    from_ip: "{{ item }}"
+    to_port: '1514'
+    proto: udp
+  loop:
+    - "{{ groups['ossecservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+    
+- import_tasks: elk.yml

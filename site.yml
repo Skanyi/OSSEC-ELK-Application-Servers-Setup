@@ -1,0 +1,8 @@
+---
+- import_playbook: ossec.yml
+- import_playbook: app.yml
+- import_playbook: filebeat.yml
+- import_playbook: elk.yml
+#- import_playbook: app.yml
+# - import_playbook: filebeat.yml
+

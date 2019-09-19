@@ -1,0 +1,24 @@
+---
+# Import the agent key Copied from the manager
+- name: (OSSEC Agent) Check if the key file exists
+  stat:
+    path: "{{ ossec_agent_keys }}"
+  register: keyfileexists
+
+- name: (OSSEC Agent) Check if appagent exist
+  shell: "cat {{ ossec_agent_keys }}"
+  register: appagentname
+  when: (hostvars['ossec']['appagentkey'] is defined) and (keyfileexists.stat.exists == True)
+
+- name: print appagentey
+  debug:
+    msg: "{{ hostvars['ossec']['appagentkey'].stdout }}"
+
+- name: (OSSEC Agent) Import App Agent
+  expect:
+    command: /var/ossec/bin/manage_agents -i "{{ hostvars['ossec']['appagentkey'].stdout }}"
+    responses:
+      Confirm adding it: 'y'
+      Press ENTER to return to the main menu: ''
+  register: ossecappagent
+  when: (keyfileexists.stat.exists == False) and ('"appagent" not in appagentname.stdout')

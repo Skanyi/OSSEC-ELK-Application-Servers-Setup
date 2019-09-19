@@ -1,0 +1,26 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/ossec/logs/alerts/alerts.json
+
+filebeat.registry.path: /var/lib/filebeat
+processors:
+- rename:
+    fields:
+    - from: "agent"
+    - to: "filebeat_agent"
+    ignore_missing: true
+
+- rename:
+    fields:
+    - from: "log.file.path"
+    - to: "source"
+    ignore_missing: true
+
+josn.keys_under_root: true
+fields: {log_type: osseclogs}
+
+output.logstash:
+  hosts: ["{{ item }}:5044"]
+  index: ossec

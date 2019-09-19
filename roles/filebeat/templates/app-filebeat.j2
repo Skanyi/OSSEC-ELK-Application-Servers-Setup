@@ -1,0 +1,31 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/access.log*
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/error.log*
+
+filebeat.registry.path: /var/lib/filebeat
+processors:
+- rename:
+    fields:
+    - from: "agent"
+    - to: "filebeat_agent"
+    ignore_missing: true
+
+- rename:
+    fields:
+    - from: "log.file.path"
+    - to: "source"
+    ignore_missing: true
+
+josn.keys_under_root: true
+fields: {log_type: systemlogs}
+
+output.logstash:
+  hosts: ["{{ item }}:5044"]
+  index: app

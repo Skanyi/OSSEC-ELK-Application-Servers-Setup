@@ -1,0 +1,35 @@
+---
+# tasks file for ossecagent
+- name: (OSSEC Agent) Update repositories cache and install required packages
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    force_apt_get: true
+  vars:
+    packages:
+    - build-essential
+
+  tags:
+    - packages
+
+- name: (OSSEC Agent) Import Agent Installer
+  import_tasks: ossec-agent.yml
+
+- name: (OSSEC Agent) Import ELK Agent key
+  import_tasks: import-elkagent-key.yml 
+  when: inventory_hostname in groups['elkservers']
+  notify: restart ossec
+
+- name: Import app agent key
+  import_tasks: import-appagent-key.yml
+  when: inventory_hostname in groups['appservers']
+  notify: restart ossec
+
+- name: print hostname
+  debug:
+    msg: "{{ inventory_hostname }}"
+
+- name: print elkserver grop
+  debug:
+    msg: "{{ groups['elkservers'] }}"

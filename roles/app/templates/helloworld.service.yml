@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn instance to serve helloword
+After=network.target
+
+[Service]
+User=vagrant
+Group=www-data
+WorkingDirectory=/home/vagrant/helloworld
+Environment="PATH=/home/vagrant/helloworld/hello_env/bin"
+ExecStart=/home/vagrant/helloworld/hello_venv/bin/gunicorn --workers 3 --bind unix:helloworld.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
+

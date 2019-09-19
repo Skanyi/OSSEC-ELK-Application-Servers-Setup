@@ -1,0 +1,49 @@
+---
+- name: (OSSEC) Update repositories cache and install required packages
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - gcc
+    - make
+    - build-essential
+    - python3-setuptools
+    - python3-pexpect
+    - apt-transport-https
+  tags:
+    - packages
+
+- name: (APP) Enable UFW to manage firewall traffic and enable Openssh
+  ufw:
+    state: enabled
+    rule: allow
+    name: OpenSSH
+
+- name: (APP) Allow all outbound traffic through firewall
+  ufw:
+     rule: allow
+     direction: out
+     to_ip: any
+
+- name: (ELK) Allow traffic from Application Servers for ossec agents
+  ufw:
+    rule: allow
+    from_ip: "{{ item }}" 
+    to_port: '1514' 
+    proto: udp
+  loop:
+    - "{{ groups['appservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+- name: (ELK) Allow traffic from ELK Servers for ossec agents
+  ufw:
+    rule: allow
+    from_ip: "{{ item }}" 
+    to_port: '1514'
+    proto: udp
+  loop:
+    - "{{ groups['elkservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+- import_tasks: ossec.yml
+- import_tasks: ossec-add-agents.yml
