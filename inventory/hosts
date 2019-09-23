@@ -51,13 +51,10 @@ appservers
 ansible_python_interpreter=/usr/bin/python3
 
 [ossecservers]
-ossec ansible_host=192.168.33.10 ansible_user=root
-#ossec ansible_host=159.65.221.71 ansible_user=root
+ossec ansible_host=192.168.33.10 ansible_user=vagrant
 
 [elkservers]
-elk ansible_host=192.168.33.11   ansible_user=root
-#elk ansible_host=134.209.79.54 ansible_user=root
+elk ansible_host=192.168.33.11   ansible_user=vagrant
 
 [appservers]
-app ansible_host=192.168.33.12   ansible_user=root
-#app ansible_host=67.205.139.110 ansible_user=root
+app ansible_host=192.168.33.12   ansible_user=vagrant

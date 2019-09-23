@@ -1,4 +1,4 @@
 ---
 # defaults file for app
 application_req_file: /home/vagrant/helloworld/requirements.txt
-application_dir: /home/vagrant/helloworld/
+application_dir: /home/vagrant/helloworld

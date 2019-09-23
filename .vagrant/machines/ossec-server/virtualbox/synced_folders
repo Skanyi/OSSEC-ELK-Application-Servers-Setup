@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/kanyi/Documents/DevOps/ossec-elk","disabled":false,"__vagrantfile":true}}}
+{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/kanyi/Documents/DevOps/OSSEC-ELK-Application-Servers-Setup","disabled":false,"__vagrantfile":true}}}

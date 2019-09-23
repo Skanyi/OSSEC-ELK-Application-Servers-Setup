@@ -19,6 +19,7 @@
     - python3-setuptools
     - python3-pexpect
     - nginx
+    
 
   tags:
     - packages
@@ -35,7 +36,7 @@
      direction: out
      to_ip: any
 
-- name: (ELK) Allow traffic from OSSEC Servers for ossec server manager
+- name: (APP) Allow traffic from OSSEC Servers for ossec server manager
   ufw:
     rule: allow
     from_ip: "{{ item }}"
@@ -44,4 +45,11 @@
   loop:
     - "{{ groups['ossecservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
 
+- name: (APP) Copy the helloworld application directory to the app server
+  copy:
+    src: ../../../helloworld/
+    dest: "{{ application_dir }}"
+    owner: vagrant
+    group: www-data
+  
 - import_tasks: app.yml

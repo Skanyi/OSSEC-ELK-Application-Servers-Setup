@@ -2,6 +2,7 @@
 - name: ansible site playbook
   hosts: "{{ target | default('appservers') }}"
   gather_facts: "{{ gather_facts | default('true') }}"
+  become: yes
   roles:
     - app
     - ossecagent

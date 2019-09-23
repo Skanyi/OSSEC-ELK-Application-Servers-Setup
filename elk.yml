@@ -2,6 +2,7 @@
 - name: ansible site playbook
   hosts: "{{ target | default('elkservers') }}"
   gather_facts: "{{ gather_facts | default('true') }}"
+  become: yes
   roles:
     - elk
     - ossecagent

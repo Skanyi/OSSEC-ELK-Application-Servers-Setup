@@ -21,10 +21,15 @@
   when: inventory_hostname in groups['elkservers']
   notify: restart ossec
 
-- name: Import app agent key
+- name: (OSSEC Agent) Import app agent key
   import_tasks: import-appagent-key.yml
   when: inventory_hostname in groups['appservers']
   notify: restart ossec
+
+- name: (OSSEC Agent) Ensure the agents are Started/running
+  systemd:
+    state: started
+    name: ossec
 
 - name: print hostname
   debug:

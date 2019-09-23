@@ -15,19 +15,19 @@
   tags:
     - packages
 
-- name: (APP) Enable UFW to manage firewall traffic and enable Openssh
+- name: (OSSEC) Enable UFW to manage firewall traffic and enable Openssh
   ufw:
     state: enabled
     rule: allow
     name: OpenSSH
 
-- name: (APP) Allow all outbound traffic through firewall
+- name: (OSSEC) Allow all outbound traffic through firewall
   ufw:
      rule: allow
      direction: out
      to_ip: any
 
-- name: (ELK) Allow traffic from Application Servers for ossec agents
+- name: (OSSEC) Allow traffic from Application Servers for ossec agents
   ufw:
     rule: allow
     from_ip: "{{ item }}" 
@@ -36,7 +36,7 @@
   loop:
     - "{{ groups['appservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
 
-- name: (ELK) Allow traffic from ELK Servers for ossec agents
+- name: (OSSEC) Allow traffic from ELK Servers for ossec agents
   ufw:
     rule: allow
     from_ip: "{{ item }}" 
@@ -44,6 +44,7 @@
     proto: udp
   loop:
     - "{{ groups['elkservers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
 
 - import_tasks: ossec.yml
 - import_tasks: ossec-add-agents.yml
