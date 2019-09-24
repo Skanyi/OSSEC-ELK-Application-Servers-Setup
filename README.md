@@ -6,11 +6,11 @@
 ![Ubuntu package](https://img.shields.io/ubuntu/v/nginx/bionic?label=Nginx&style=for-the-badge)
 ![Ubuntu package](https://img.shields.io/ubuntu/v/gunicorn/bionic?label=Gunicorn&style=for-the-badge)
 
-![OSSEC] (images/ossec_logo_2.png)
-![ElasticSearch] (images/elasticsearch.png)
-![Logstash] (images/logstash.png)
-![Kibana] (images/kibana.png)
-![Filebeat] (images/filebeat.png)
+![OSSEC](images/ossec_logo_2.png)
+![OSSEC](images/elasticsearch.png)
+![OSSEC](images/logstash.png)
+![OSSEC](images/kibana.png)
+![OSSEC](images/filebeat.png)
 
 To get this running quickly running locally, you need to do few things. 
 
