@@ -72,8 +72,8 @@
   when: kibanastat.stat.exists == false
 
 - name: (Kibana) Configure Kibana Dashboard to proxy Requests
-  copy:
-    src: roles/elk/templates/kibana.yml
+  template:
+    src: roles/elk/templates/kibana.j2
     dest: /etc/nginx/sites-available/kibana
   when: kibanastat.stat.exists == false
 

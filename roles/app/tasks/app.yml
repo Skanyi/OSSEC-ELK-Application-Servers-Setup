@@ -22,8 +22,8 @@
     enabled: yes
  
 - name: (APP) Configure Nginx to proxy Requests
-  copy:
-    src: roles/app/templates/nginx.yml
+  template:
+    src: roles/app/templates/nginx.j2
     dest: /etc/nginx/sites-available/helloworld
 
 - name: (APP) Create a Symbolic link of the nginx file

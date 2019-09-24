@@ -34,8 +34,3 @@
 - name: (OSSEC Agent) Extract Key for the appagent
   shell: "cat {{ ossec_agent_keys }} | grep -e appagent | awk -F ' ' '{print $0}' | base64"
   register: appagentkey
-
-
-- name: (OSSEC Agent) Print key
-  debug:
-    msg: "{{ appagentkey.stdout }}"

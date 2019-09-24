@@ -26,4 +26,8 @@ Creds:ou might want to change this or even use ansible vault to pass senstive in
 On Kibana, for the first time, you should be able to see two indices,  `ossec* and app*`. Under index patterns, Click on create index pattern.
 Create two index patters, ossec* and app*. The application logs will be under the app* index and the ossec logs will be under the ossec* index.
 
-After here, you are all set and can play around the Kibana t explore its capabilities. You can start by creating a dashboard. 
+After here, you are all set and can play around the Kibana to explore its capabilities. You can start by creating a dashboard. 
+
+
+## To Do List
+1. Integrate Ansible Vault.

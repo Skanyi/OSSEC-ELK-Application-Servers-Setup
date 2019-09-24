@@ -10,10 +10,6 @@
   register: appagentname
   when: (hostvars['ossec']['appagentkey'] is defined) and (keyfileexists.stat.exists == True)
 
-- name: print appagentey
-  debug:
-    msg: "{{ hostvars['ossec']['appagentkey'].stdout }}"
-
 - name: (OSSEC Agent) Import App Agent
   expect:
     command: /var/ossec/bin/manage_agents -i "{{ hostvars['ossec']['appagentkey'].stdout }}"

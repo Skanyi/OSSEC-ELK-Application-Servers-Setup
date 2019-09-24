@@ -30,11 +30,3 @@
   systemd:
     state: started
     name: ossec
-
-- name: print hostname
-  debug:
-    msg: "{{ inventory_hostname }}"
-
-- name: print elkserver grop
-  debug:
-    msg: "{{ groups['elkservers'] }}"
