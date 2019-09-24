@@ -1,4 +1,17 @@
 ### Quick OSSEC + ELK + App servers Setup.
+
+![Ubuntu package](https://img.shields.io/ubuntu/v/ansible/bionic?label=Ansible&style=for-the-badge)
+![Ubuntu package](https://img.shields.io/ubuntu/v/vagrant/bionic?label=Vagrant&style=for-the-badge)
+![Ubuntu package](https://img.shields.io/ubuntu/v/virtualbox/bionic?label=VirtualBox&style=for-the-badge)
+![Ubuntu package](https://img.shields.io/ubuntu/v/nginx/bionic?label=Nginx&style=for-the-badge)
+![Ubuntu package](https://img.shields.io/ubuntu/v/gunicorn/bionic?label=Gunicorn&style=for-the-badge)
+
+![OSSEC] (images/ossec_logo_2.png)
+![ElasticSearch] (images/elasticsearch.png)
+![Logstash] (images/logstash.png)
+![Kibana] (images/kibana.png)
+![Filebeat] (images/filebeat.png)
+
 To get this running quickly running locally, you need to do few things. 
 
 1. Ensure you have ansible, Virtualbox and vagrant installed on your local machine
